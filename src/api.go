@@ -29,7 +29,7 @@ type Certs struct {
 
 func main() {
 	r := mux.NewRouter()
-
+	r.StrictSlash(true)
 	n := negroni.Classic() // Includes some default middlewares
 
 	// add jwt authentication
@@ -69,6 +69,8 @@ func ShowAPI(r *mux.Router) {
 
 func RegisterRequests(r *mux.Router) {
 	r.HandleFunc("/", listAPI).Methods("GET")
+	r.HandleFunc("/api", listAPI).Methods("GET")
+	r.HandleFunc("/api/v1", listAPI).Methods("GET")
 	r.HandleFunc("/api/v1/services", listServices).Methods("GET")
 	r.HandleFunc("/api/v1/services/{service}", detailService).Methods("GET")
 	r.HandleFunc("/api/v1/services/{service}", createService).Methods("POST")
@@ -82,7 +84,6 @@ func RegisterRequests(r *mux.Router) {
 }
 
 func listAPI(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(AllRoutes)
 	rtjson, _ := json.Marshal(AllRoutes)
 	fmt.Fprintf(w, string(rtjson))
 	return
