@@ -1,72 +1,73 @@
 package main
+
 import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/pkg/transport"
 	"golang.org/x/net/context"
-	"time"
 	"strings"
+	"time"
 )
 
 const ENTRYPOINTS string = "127.0.0.1:2379"
-const CONNTIMEOUT = 5*time.Second
-const OPTIMEOUT = 5*time.Second
+const CONNTIMEOUT = 5 * time.Second
+const OPTIMEOUT = 5 * time.Second
 
-func getclient() (error,*clientv3.Client,context.Context) {
+func getclient() (error, *clientv3.Client, context.Context) {
 	var cfg clientv3.Config
 	if Config.Etcd.Https {
 		tlsInfo := transport.TLSInfo{
-			CertFile:  Config.Etcd.Certfile,
-			KeyFile:   Config.Etcd.Keyfile,
+			CertFile:      Config.Etcd.Certfile,
+			KeyFile:       Config.Etcd.Keyfile,
 			TrustedCAFile: Config.Etcd.CertCA,
 		}
 		tlsconfig, _ := tlsInfo.ClientConfig()
 		cfg = clientv3.Config{
-			Endpoints: strings.Split(Config.Etcd.Endpoints,","),
+			Endpoints:   strings.Split(Config.Etcd.Endpoints, ","),
 			DialTimeout: CONNTIMEOUT,
-			TLS: tlsconfig,
+			TLS:         tlsconfig,
 		}
 	} else {
-		cfg =  clientv3.Config{
-			Endpoints: strings.Split(ENTRYPOINTS,","),
+		cfg = clientv3.Config{
+			Endpoints:   strings.Split(ENTRYPOINTS, ","),
 			DialTimeout: CONNTIMEOUT,
 		}
 	}
-	client,err := clientv3.New(cfg)
-	if err != nil{
-		return err,nil,nil
+	client, err := clientv3.New(cfg)
+	if err != nil {
+		return err, nil, nil
 	}
-	ctx, _ := context.WithTimeout(context.Background(),OPTIMEOUT)
-	return nil,client,ctx
+	ctx, _ := context.WithTimeout(context.Background(), OPTIMEOUT)
+	return nil, client, ctx
 }
 
-func List(prefix string) ([]string,error) {
-	err,client,ctx := getclient()
-	if err!=nil{
-		return nil,err
+func List(prefix string) ([]string, error) {
+	err, client, ctx := getclient()
+	if err != nil {
+		return nil, err
 	}
-	resp,err1 := client.Get(ctx,prefix,clientv3.WithPrefix(),clientv3.WithSort(clientv3.SortByKey,clientv3.SortDescend))
+	resp, err1 := client.Get(ctx, prefix, clientv3.WithPrefix(), clientv3.WithSort(clientv3.SortByKey, clientv3.SortDescend))
 	if err1 != nil {
-		return nil,err1
+		return nil, err1
 	}
 	result := []string{}
-	for _,ev := range resp.Kvs {
-		k := strings.TrimPrefix(string(ev.Key),prefix)
-		k = strings.TrimPrefix(k,"/")
-		tmp := strings.Split(k,"/")[0]
-		result = append(result,tmp)
+	for _, ev := range resp.Kvs {
+		k := strings.TrimPrefix(string(ev.Key), prefix)
+		k = strings.TrimPrefix(k, "/")
+		tmp := strings.Split(k, "/")[0]
+		result = append(result, tmp)
 	}
 	result = removeRepeat(result)
-	return result,nil
+	return result, nil
 
 }
 
-func Put(key string,value string) error {
-	err,client,ctx := getclient()
+func Put(key string, value string) error {
+	err, client, ctx := getclient()
 	if err != nil {
 		return err
 	}
 	defer client.Close()
-	_, err = client.Put(ctx,key,value)
+	_, err = client.Put(ctx, key, value)
 	if err != nil {
 		return err
 	}
@@ -74,72 +75,71 @@ func Put(key string,value string) error {
 }
 
 func PutMap(srcmap map[string]string) error {
-	err,client,ctx := getclient()
+	err, client, ctx := getclient()
 	if err != nil {
 		return err
 	}
 	defer client.Close()
-	for k,v := range srcmap {
-		if _,err = client.Put(ctx,k,v);err != nil {
+	for k, v := range srcmap {
+		if _, err = client.Put(ctx, k, v); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func Get(key string) (string,error) {
-	err,client,ctx := getclient()
-	if err!=nil{
-		return "",err
+func Get(key string) (string, error) {
+	err, client, ctx := getclient()
+	if err != nil {
+		return "", err
 	}
 	defer client.Close()
-	resp, err1 := client.Get(ctx,key)
+	resp, err1 := client.Get(ctx, key)
 	if err1 != nil {
-		return "",err
+		return "", err
 	}
 	if resp.Kvs != nil {
-		return string(resp.Kvs[0].Value),nil
+		return string(resp.Kvs[0].Value), nil
 	}
-	return "",nil
+	return "", nil
 }
 
 func DeleteWithPrefix(prefix string) error {
-	err,client,ctx := getclient()
-	if err!=nil{
+	err, client, ctx := getclient()
+	if err != nil {
 		return err
 	}
 	defer client.Close()
-	if _,err1 := client.Delete(ctx,prefix,clientv3.WithPrefix());err1 != nil{
+	if _, err1 := client.Delete(ctx, prefix, clientv3.WithPrefix()); err1 != nil {
 		return err1
 	}
 	return nil
 }
 
 func DeleteWithPrefixInList(prefixs []string) error {
-	err,client,ctx := getclient()
-	if err!=nil{
+	err, client, ctx := getclient()
+	if err != nil {
 		return err
 	}
 	defer client.Close()
-	for _,prefix := range prefixs{
-		if _,err := client.Delete(ctx,prefix,clientv3.WithPrefix());err != nil{
+	for _, prefix := range prefixs {
+		if _, err := client.Delete(ctx, prefix, clientv3.WithPrefix()); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-
-func removeRepeat(src []string) []string{
+func removeRepeat(src []string) []string {
 	helpmap := make(map[string]struct{})
-	for _,v := range src{
-		if _,exsit := helpmap[v];!exsit{
+	for _, v := range src {
+		if _, exsit := helpmap[v]; !exsit {
 			helpmap[v] = struct{}{}
 		}
 	}
 	dst := []string{}
-	for s,_ := range helpmap {
-		dst = append(dst,s)
+	for s := range helpmap {
+		dst = append(dst, s)
 	}
 	return dst
 }

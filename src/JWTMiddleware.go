@@ -2,12 +2,12 @@ package main
 
 import (
 	//"net/http"
-	"strings"
-	"fmt"
 	"errors"
+	"fmt"
+	jwt "github.com/dgrijalva/jwt-go"
 	"log"
 	"net/http"
-	jwt "github.com/dgrijalva/jwt-go"
+	"strings"
 )
 
 type JWTMiddleware struct {
@@ -34,21 +34,21 @@ func (m *JWTMiddleware) logf(format string, args ...interface{}) {
 	}
 }
 
-func JWTMiddlewareNew () *JWTMiddleware{
+func JWTMiddlewareNew() *JWTMiddleware {
 	return &JWTMiddleware{
 		"etcd",
 		"etcd123",
 	}
 }
 
-func (m *JWTMiddleware) parse (signedstring string, w http.ResponseWriter, r *http.Request) (*jwt.Token, error){
+func (m *JWTMiddleware) parse(signedstring string, w http.ResponseWriter, r *http.Request) (*jwt.Token, error) {
 	token, err := jwt.Parse(signedstring, func(token *jwt.Token) (interface{}, error) {
-    // Don't forget to validate the alg is what you expect:
-	    if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-	        return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-	    }
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
 
-	    return mySigningKey, nil
+		return mySigningKey, nil
 	})
 
 	if err != nil {
@@ -63,17 +63,17 @@ func (m *JWTMiddleware) parse (signedstring string, w http.ResponseWriter, r *ht
 		return nil, errors.New("Token is invalid")
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		if claims["username"] != "etcd" && 
+		if claims["username"] != "etcd" &&
 			claims["password"] != "etcd123" {
-				m.logf("username or password not correct")
-				OnError(w, r, "username or password not correct")
-				return nil, errors.New("username or password not correct")
-			}
+			m.logf("username or password not correct")
+			OnError(w, r, "username or password not correct")
+			return nil, errors.New("username or password not correct")
+		}
 
-    	fmt.Println(claims["username"], claims["password"])
-    	return token, nil
+		fmt.Println(claims["username"], claims["password"])
+		return token, nil
 	} else {
-	    m.logf("can not get claims")
+		m.logf("can not get claims")
 		OnError(w, r, "can not get claims")
 		return nil, errors.New("can not get claims")
 	}
@@ -96,7 +96,7 @@ func FromAuthHeader(r *http.Request) (string, error) {
 	return authHeaderParts[1], nil
 }
 
-func (m *JWTMiddleware) ServeHTTP (rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func (m *JWTMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	tokenString, err := FromAuthHeader(r)
 	// If the tokenString is empty...
 	if tokenString == "" {
@@ -112,7 +112,7 @@ func (m *JWTMiddleware) ServeHTTP (rw http.ResponseWriter, r *http.Request, next
 		m.logf("Error parsing tokenString: %v", err)
 		OnError(rw, r, err.Error())
 	}
-	
+
 	// If there was an error, do not call next.
 	if err == nil && next != nil {
 		next(rw, r)
