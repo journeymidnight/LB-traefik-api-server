@@ -106,8 +106,15 @@ func createCert (w http.ResponseWriter, r *http.Request) {
   	return
   }
 
-  if _,err := checkValid(file.CertFile, file.KeyFile); err!=nil {
+  if _, cn, err := parseCert(file.CertFile, file.KeyFile); err!=nil {
   	apiError := &APIError{Ecode:InvalidFile, EMessage:"cert file not valid"}
+	retjson, _ := json.Marshal(apiError)
+	fmt.Fprintf(w,string(retjson))
+  	return
+  }
+
+  if cn == nil || cn != servicename {
+  	apiError := &APIError{Ecode:InvalidFile, EMessage:"Common name not correct"}
 	retjson, _ := json.Marshal(apiError)
 	fmt.Fprintf(w,string(retjson))
   	return
@@ -167,6 +174,11 @@ func updateCert(w http.ResponseWriter, r *http.Request) {
   vars := mux.Vars(r)
   serviceName := vars["service"]
 
+  if err := checkServiceAlreadyExist(serviceName); err!=nil {
+  	fmt.Fprintf(w, string(err))
+   	return
+  }
+
   body, _ := ioutil.ReadAll(r.Body)
   if err := checkNilJSON(body); err!=nil {
    	fmt.Fprintf(w, string(err))
@@ -181,12 +193,20 @@ func updateCert(w http.ResponseWriter, r *http.Request) {
   	return
   }
 
-  if _,err := checkValid(file.CertFile, file.KeyFile); err!=nil {
+  if _, cn, err := parseCert(file.CertFile, file.KeyFile); err!=nil {
   	apiError := &APIError{Ecode:InvalidFile, EMessage:"cert file not valid"}
 	retjson, _ := json.Marshal(apiError)
 	fmt.Fprintf(w,string(retjson))
   	return
   }
+
+  if cn == nil || cn != servicename {
+  	apiError := &APIError{Ecode:InvalidFile, EMessage:"Common name not correct"}
+	retjson, _ := json.Marshal(apiError)
+	fmt.Fprintf(w,string(retjson))
+  	return
+  }
+
   if err := Put(CertPATH + serviceName + CERT, file.CertFile); err != nil {
   	apiError := &APIError{Ecode:InternalError, EMessage:"error while updating cert file"}
 	retjson, _ := json.Marshal(apiError)

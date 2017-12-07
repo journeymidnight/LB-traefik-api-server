@@ -35,14 +35,18 @@ var oid = map[string]string{
     "0.9.2342.19200300.100.1.1":  "userid",
 }
 
-func getDNFromCert(namespace pkix.Name, sep string) (string, error) {
+func getDNFromCert(namespace pkix.Name, sep string) (string, string, error) {
     subject := []string{}
+    var commonName string
     for _, s := range namespace.ToRDNSequence() {
         for _, i := range s {
             if v, ok := i.Value.(string); ok {
                 if name, ok := oid[i.Type.String()]; ok {
                     // <oid name>=<value>
                     subject = append(subject, fmt.Sprintf("%s=%s", name, v))
+                    if name == "CN" {
+                      commonName = v
+                    }
                 } else {
                     // <oid>=<value> if no <oid name> is found
                     subject = append(subject, fmt.Sprintf("%s=%s", i.Type.String(), v))
@@ -53,10 +57,10 @@ func getDNFromCert(namespace pkix.Name, sep string) (string, error) {
             }
         }
     }
-    return sep + strings.Join(subject, sep), nil
+    return sep + strings.Join(subject, sep), commonName, nil
 }
 
-func X509KeyPair(certPEMBlock, keyPEMBlock []byte) (cert tls.Certificate, err error) {
+func X509KeyPair(certPEMBlock, keyPEMBlock []byte) (cert tls.Certificate, cn string, err error) {
 	fmt.Println(certPEMBlock)
   var certDERBlock *pem.Block
   for {
@@ -72,10 +76,10 @@ func X509KeyPair(certPEMBlock, keyPEMBlock []byte) (cert tls.Certificate, err er
   }
 
   if len(cert.Certificate) == 0 {
-	  fmt.Println("got none...")
     err = errors.New("crypto/tls: failed to parse certificate PEM data")
     return
   }
+
   var keyDERBlock *pem.Block
   for {
     keyDERBlock, keyPEMBlock = pem.Decode(keyPEMBlock)
@@ -83,38 +87,38 @@ func X509KeyPair(certPEMBlock, keyPEMBlock []byte) (cert tls.Certificate, err er
       err = errors.New("crypto/tls: failed to parse key PEM data")
       return
     }
+
+    // we don't support a cryptic certificate right now
 		// if x509.IsEncryptedPEMBlock(keyDERBlock) {
-  //     out, err2 := x509.DecryptPEMBlock(keyDERBlock, pw)
-		// 	if err2 != nil {
-		// 		err = err2
-		// 		return
-		// 	}
-  //     keyDERBlock.Bytes = out
-  //     break
+  //      out, err2 := x509.DecryptPEMBlock(keyDERBlock, pw)
+		//  	 if err2 != nil {
+		//  		  err = err2
+		//  		  return
+		//  	 }
+  //      keyDERBlock.Bytes = out
+  //      break
   //   }
     if keyDERBlock.Type == "PRIVATE KEY" || strings.HasSuffix(keyDERBlock.Type, " PRIVATE KEY") {
       break
     }
   }
 
-     cert.PrivateKey, err = parsePrivateKey(keyDERBlock.Bytes)
-     if err != nil {
-      return
-     }
+  cert.PrivateKey, err = parsePrivateKey(keyDERBlock.Bytes)
+  if err != nil {
+    return
+  }
   // We don't need to parse the public key for TLS, but we so do anyway
   // to check that it looks sane and matches the private key.
   x509Cert, err := x509.ParseCertificate(cert.Certificate[0])
   if err != nil {
     return
   }
-  fmt.Println("private key parsed")
-  subj, err := getDNFromCert(x509Cert.Subject, "/")
+
+  subj, cn, err := getDNFromCert(x509Cert.Subject, "/")
   if err != nil {
-  // do error handling
-  fmt.Println("err")
+    fmt.Println("err")
   }
-  fmt.Println(subj)
-  return 
+  return
 }
 
 func parsePrivateKey(der []byte) (crypto.PrivateKey, error) {
@@ -136,11 +140,8 @@ func parsePrivateKey(der []byte) (crypto.PrivateKey, error) {
   return nil, errors.New("crypto/tls: failed to parse private key")
 }
 
-func checkValid(certFile, keyFile string) (cert tls.Certificate, err error){
-	fmt.Println("entering the checkValid")
-	fmt.Println([]byte("abc"))
+func parseCert(certFile, keyFile string) (cert tls.Certificate, cn string, err error){
   certPEMBlock := []byte(certFile)
-  //fmt.Println(certPEMBlock)
   keyPEMBlock := []byte(keyFile)
   return X509KeyPair(certPEMBlock, keyPEMBlock)
 }
