@@ -1,0 +1,18 @@
+workspace:
+  base: /go
+  path: src/github.com/journeymidnight/LB-traefik-api-server
+
+pipeline:
+  build:
+    image: 
+    commands:
+      - "cd src"
+      - "go get ./..."
+      - "go build -o lb-app"
+  github_release:
+    image: plugins/github-release
+    files:
+      - "lb-app"
+    secrets: [github_token]
+    when:
+      event: [tag]
