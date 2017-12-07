@@ -1,0 +1,10 @@
+
+logpath = "/var/log/api.log"
+loglevel = "info"
+
+[etcd]
+endpoint = "127.0.0.1"
+https = true
+certfile = "etcd.crt"
+keyfile = "etcd.key"
+

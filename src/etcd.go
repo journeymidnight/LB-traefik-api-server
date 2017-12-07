@@ -13,15 +13,15 @@ const OPTIMEOUT = 5*time.Second
 
 func getclient() (error,*clientv3.Client,context.Context) {
 	var cfg clientv3.Config
-	if false {
+	if Config.Etcd.Https {
 		tlsInfo := transport.TLSInfo{
-			CertFile:  "",
-			KeyFile:   "",
-			TrustedCAFile: "",
+			CertFile:  Config.Etcd.Certfile,
+			KeyFile:   Config.Etcd.Keyfile,
+			TrustedCAFile: Config.Etcd.CertCA,
 		}
 		tlsconfig, _ := tlsInfo.ClientConfig()
 		cfg = clientv3.Config{
-			Endpoints: strings.Split(ENTRYPOINTS,","),
+			Endpoints: strings.Split(Config.Etcd.Endpoints,","),
 			DialTimeout: CONNTIMEOUT,
 			TLS: tlsconfig,
 		}
