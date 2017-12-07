@@ -66,7 +66,8 @@ func X509KeyPair(certPEMBlock, keyPEMBlock []byte) (cert tls.Certificate, cn str
   }
 
   // Add check for SAN extension, and we currently not support it
-  if x509Cert.Extensions != nil {
+  if x509Cert.DNSNames != nil || x509Cert.EmailAddresses != nil || 
+      x509Cert.IPAddresses !=nil /*|| x509Cert.Extensions != nil*/ {
     err = errors.New("crypto/tls: found extra name(SAN)")
     return
   }
