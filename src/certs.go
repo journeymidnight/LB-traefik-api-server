@@ -65,6 +65,12 @@ func X509KeyPair(certPEMBlock, keyPEMBlock []byte) (cert tls.Certificate, cn str
     return
   }
 
+  // Add check for SAN extension, and we currently not support it
+  if x509Cert.Extensions != nil {
+    err = errors.New("crypto/tls: found extra name(SAN)")
+    return
+  }
+
   if x509Cert != nil {
       cn = x509Cert.Subject.CommonName
   }
