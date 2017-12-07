@@ -66,9 +66,7 @@ func X509KeyPair(certPEMBlock, keyPEMBlock []byte) (cert tls.Certificate, cn str
   }
 
   if x509Cert != nil {
-    if x509Cert.Subject != nil {
       cn = x509Cert.Subject.CommonName
-    }
   }
   return
 }
