@@ -111,9 +111,7 @@ func createCert (w http.ResponseWriter, r *http.Request) {
 	retjson, _ := json.Marshal(apiError)
 	fmt.Fprintf(w,string(retjson))
   	return
-  }
-
-  if cn == nil || cn != servicename {
+  } else if cn == nil || cn != serviceName {
   	apiError := &APIError{Ecode:InvalidFile, EMessage:"Common name not correct"}
 	retjson, _ := json.Marshal(apiError)
 	fmt.Fprintf(w,string(retjson))
@@ -198,9 +196,7 @@ func updateCert(w http.ResponseWriter, r *http.Request) {
 	retjson, _ := json.Marshal(apiError)
 	fmt.Fprintf(w,string(retjson))
   	return
-  }
-
-  if cn == nil || cn != servicename {
+  } else if cn == nil || cn != serviceName {
   	apiError := &APIError{Ecode:InvalidFile, EMessage:"Common name not correct"}
 	retjson, _ := json.Marshal(apiError)
 	fmt.Fprintf(w,string(retjson))
