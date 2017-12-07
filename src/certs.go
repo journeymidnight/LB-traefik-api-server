@@ -114,7 +114,7 @@ func X509KeyPair(certPEMBlock, keyPEMBlock []byte) (cert tls.Certificate, cn str
     return
   }
 
-  _, cn, err := getDNFromCert(x509Cert.Subject, "/")
+  _, cn, err = getDNFromCert(x509Cert.Subject, "/")
   if err != nil {
     fmt.Println("err")
   }
