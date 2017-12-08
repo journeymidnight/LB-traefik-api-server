@@ -38,7 +38,7 @@ func DefaultConfiguration() *Configuration {
 		Https:     false,
 	}
 	cfg := &Configuration{
-		Accesslog:  "api-access.log"
+		Accesslog:  "api-access.log",
 		Logpath:  "api.log",
 		Loglevel: "info",
 		Etcd:     etcd,

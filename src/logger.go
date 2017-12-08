@@ -3,6 +3,7 @@ package main
 import  (
 	"os"
 	"io"
+	"path/filepath"
 	olog "github.com/sirupsen/logrus"
 )
 var log *olog.Logger 
