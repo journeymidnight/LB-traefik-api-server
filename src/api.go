@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
+	negronilogrus "github.com/meatballhat/negroni-logrus"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -19,6 +22,7 @@ var CertPATH = "/traefik/tlsconfiguration/"
 var CERT = "/certificate/certfile"
 var KEY = "/certificate/keyfile"
 var ENTRYPOINT = "/entrypoints"
+var ACCESSFILE = "api-server-access.log"
 
 var AllRoutes []map[string]string
 
@@ -27,17 +31,35 @@ type Certs struct {
 	KeyFile  string
 }
 
+func openAccessLogFile(filePath string) (*os.File, error) {
+	dir := filepath.Dir(filePath)
+
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create log path %s: %s", dir, err)
+	}
+
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
+	if err != nil {
+		return nil, fmt.Errorf("error opening file %s: %s", filePath, err)
+	}
+
+	return file, nil
+}
+
 func main() {
 	r := mux.NewRouter()
 	r.StrictSlash(true)
-	n := negroni.Classic() // Includes some default middlewares
+	n := negroni.New() // Includes some default middlewares
 
 	// add jwt authentication
 	//  JWTMiddleware := JWTMiddlewareNew()
 	//  n.Use(negroni.HandlerFunc(JWTMiddleware.ServeHTTP))
 
-	// add recovery middleware
-	n.Use(negroni.NewRecovery())
+	// add log middleware
+	logrusMiddleWare := negronilogrus.NewMiddleware()
+	file, _ := openAccessLogFile(ACCESSFILE)
+	logrusMiddleWare.Logger.Out = file
+	n.Use(logrusMiddleWare)
 
 	RegisterRequests(r)
 	ShowAPI(r)
