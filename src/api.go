@@ -43,8 +43,8 @@ func main() {
 	if err == nil {
 		logrusMiddleWare.Logger.Out = file
 		n.Use(logrusMiddleWare)
+		defer file.Close()
 	}
-	defer file.Close()
 
 	RegisterRequests(r)
 	ShowAPI(r)
