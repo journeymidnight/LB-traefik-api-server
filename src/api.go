@@ -22,28 +22,12 @@ var CertPATH = "/traefik/tlsconfiguration/"
 var CERT = "/certificate/certfile"
 var KEY = "/certificate/keyfile"
 var ENTRYPOINT = "/entrypoints"
-var ACCESSFILE = "api-server-access.log"
 
 var AllRoutes []map[string]string
 
 type Certs struct {
 	CertFile string
 	KeyFile  string
-}
-
-func openAccessLogFile(filePath string) (*os.File, error) {
-	dir := filepath.Dir(filePath)
-
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create log path %s: %s", dir, err)
-	}
-
-	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0664)
-	if err != nil {
-		return nil, fmt.Errorf("error opening file %s: %s", filePath, err)
-	}
-
-	return file, nil
 }
 
 func main() {
@@ -57,9 +41,12 @@ func main() {
 
 	// add log middleware
 	logrusMiddleWare := negronilogrus.NewMiddleware()
-	file, _ := openAccessLogFile(ACCESSFILE)
-	logrusMiddleWare.Logger.Out = file
-	n.Use(logrusMiddleWare)
+	file, err := openAccessLogFile()
+	if err == nil {
+		logrusMiddleWare.Logger.Out = file
+		n.Use(logrusMiddleWare)
+	}
+	defer file.Close()
 
 	RegisterRequests(r)
 	ShowAPI(r)

@@ -18,6 +18,7 @@ func init() {
 }
 
 type Configuration struct {
+	Accesslog string
 	Logpath  string
 	Loglevel string
 	Etcd     *Etcd
@@ -37,6 +38,7 @@ func DefaultConfiguration() *Configuration {
 		Https:     false,
 	}
 	cfg := &Configuration{
+		Accesslog:  "api-access.log"
 		Logpath:  "api.log",
 		Loglevel: "info",
 		Etcd:     etcd,
@@ -60,6 +62,7 @@ func LoadConfig() (*Configuration, error) {
 
 func configFromFlag() *Configuration {
 	cfg := &Configuration{Etcd: &Etcd{}}
+	flag.StringVar(&cfg.Accesslog, "accesslog", "", "path for access file")
 	flag.StringVar(&cfg.Logpath, "logpath", "", "path for the log file")
 	flag.StringVar(&cfg.Loglevel, "loglevel", "", "using standard go library")
 	flag.StringVar(&cfg.Etcd.Endpoints, "etcd.endpoints", "", "ip/port pairs seperated by comma")
