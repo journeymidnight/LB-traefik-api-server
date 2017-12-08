@@ -49,11 +49,11 @@ func DefaultConfiguration() *Configuration {
 func LoadConfig() (*Configuration, error) {
 	rtConfig := DefaultConfiguration()
 	if _, err := os.Stat(CONFIGPATH); err != nil {
-		log.Warning("config file does exsit,skipped config file")
+		fmt.Fprint(os.Stderr,"config file does exsit,skipped config file")
 	} else {
 		_, err = toml.DecodeFile("conf.toml", &rtConfig)
 		if err != nil {
-			log.Warning("failed to decode config file,skipped config file")
+			fmt.Fprint(os.Stderr,"failed to decode config file,skipped config file")
 		}
 	}
 	mergeConfig(rtConfig, configFromFlag())
@@ -87,25 +87,25 @@ func mergeValue(v, v1 reflect.Value) {
 			if v.Field(i).CanSet() && !v1.Field(i).IsNil() {
 				mergeValue(v.Field(i).Elem(), v1.Field(i).Elem())
 			} else {
-				log.Debug(v.Field(i), "can not set or value is empty")
+				fmt.Fprint(os.Stderr,"can not set or value is empty")
 			}
 		case reflect.Bool:
 			if v.Field(i).CanSet() {
 				v.Field(i).Set(v1.Field(i))
 			} else {
-				log.Debug(v.Field(i), "can not set or value is empty")
+				fmt.Fprint(os.Stderr,"can not set or value is empty")
 			}
 		case reflect.Int:
 			if v.Field(i).CanSet() && v1.Field(i).Int() != 0 {
 				v.Field(i).Set(v1.Field(i))
 			} else {
-				log.Debug(v.Field(i), "can not set or value is empty")
+				fmt.Fprint(os.Stderr,"can not set or value is empty")
 			}
 		default:
 			if v.Field(i).CanSet() && v1.Field(i).Len() != 0 {
 				v.Field(i).Set(v1.Field(i))
 			} else {
-				log.Debug(v.Field(i), "can not set or value is empty")
+				fmt.Fprint(os.Stderr,"can not set or value is empty")
 			}
 		}
 	}
