@@ -4,6 +4,8 @@ import  (
 	"os"
 	"io"
 	"path/filepath"
+	"fmt"
+	"errors"
 	olog "github.com/sirupsen/logrus"
 )
 var log *olog.Logger 
