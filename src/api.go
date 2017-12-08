@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"encoding/json"
 	"github.com/gorilla/mux"

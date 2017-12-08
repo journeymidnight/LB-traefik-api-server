@@ -23,7 +23,7 @@ func openAccessLogFile () (*os.File, error) {
 	if Config.Accesslog == "" {
 		return nil, errors.New("No access log provided")
 	}
-	filepath := Config.Accesslog
+	filePath := Config.Accesslog
 	dir := filepath.Dir(filePath)
 
 	if err := os.MkdirAll(dir, 0755); err != nil {
