@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	jwt "github.com/dgrijalva/jwt-go"
-	"log"
 	"net/http"
 	"strings"
 )

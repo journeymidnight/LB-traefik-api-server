@@ -45,7 +45,7 @@ func main() {
 	n.UseHandler(r)
 
 	http.ListenAndServe(":80", n)
-	fmt.Printf("Web server exits")
+	log.Info("Web server started")
 }
 
 func ShowAPI(r *mux.Router) {

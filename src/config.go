@@ -38,7 +38,7 @@ func DefaultConfiguration() *Configuration {
 	}
 	cfg := &Configuration{
 		Logpath:  "api.log",
-		Loglevel: "Info",
+		Loglevel: "info",
 		Etcd:     etcd,
 	}
 	return cfg
@@ -47,11 +47,11 @@ func DefaultConfiguration() *Configuration {
 func LoadConfig() (*Configuration, error) {
 	rtConfig := DefaultConfiguration()
 	if _, err := os.Stat(CONFIGPATH); err != nil {
-		fmt.Println("file does exsit")
+		log.Warning("config file does exsit,skipped config file")
 	} else {
 		_, err = toml.DecodeFile("conf.toml", &rtConfig)
 		if err != nil {
-			fmt.Println("err decode toml")
+			log.Warning("failed to decode config file,skipped config file")
 		}
 	}
 	mergeConfig(rtConfig, configFromFlag())
@@ -84,28 +84,25 @@ func mergeValue(v, v1 reflect.Value) {
 			if v.Field(i).CanSet() && !v1.Field(i).IsNil() {
 				mergeValue(v.Field(i).Elem(), v1.Field(i).Elem())
 			} else {
-				fmt.Println(v.Field(i), "can not set or value is empty")
+				log.Debug(v.Field(i), "can not set or value is empty")
 			}
 		case reflect.Bool:
 			if v.Field(i).CanSet() {
-				fmt.Println("ok")
 				v.Field(i).Set(v1.Field(i))
 			} else {
-				fmt.Println(v.Field(i).CanSet())
-				fmt.Println(v.Field(i), "can not set or value is empty")
+				log.Debug(v.Field(i), "can not set or value is empty")
 			}
 		case reflect.Int:
 			if v.Field(i).CanSet() && v1.Field(i).Int() != 0 {
 				v.Field(i).Set(v1.Field(i))
 			} else {
-				fmt.Println(v.Field(i).CanSet())
-				fmt.Println(v.Field(i), "can not set or value is empty")
+				log.Debug(v.Field(i), "can not set or value is empty")
 			}
 		default:
 			if v.Field(i).CanSet() && v1.Field(i).Len() != 0 {
 				v.Field(i).Set(v1.Field(i))
 			} else {
-				fmt.Println(v.Field(i), "can not set or value is empty")
+				log.Debug(v.Field(i), "can not set or value is empty")
 			}
 		}
 	}
