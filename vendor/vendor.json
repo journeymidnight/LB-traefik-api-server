@@ -1,0 +1,55 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "Pc2ORQp+VY3Un/dkh4QwLC7R6lE=",
+			"path": "github.com/BurntSushi/toml",
+			"revision": "a368813c5e648fee92e5f6c30e3944ff9d5e8895",
+			"revisionTime": "2017-06-26T11:06:00Z"
+		},
+		{
+			"checksumSHA1": "GKjFACMtrF7cCebmozdNblNelCY=",
+			"path": "github.com/coreos/etcd/clientv3",
+			"revision": "dbd178767243d24e0e94b83804ad43eeebe75e50",
+			"revisionTime": "2017-11-29T01:46:07Z"
+		},
+		{
+			"checksumSHA1": "PoTXn5yRFx7RyFeBgjoPoAbx2C0=",
+			"path": "github.com/coreos/etcd/pkg/transport",
+			"revision": "dbd178767243d24e0e94b83804ad43eeebe75e50",
+			"revisionTime": "2017-11-29T01:46:07Z"
+		},
+		{
+			"checksumSHA1": "+TKtBzv23ywvmmqRiGEjUba4YmI=",
+			"path": "github.com/dgrijalva/jwt-go",
+			"revision": "dbeaa9332f19a944acb5736b4456cfcc02140e29",
+			"revisionTime": "2017-10-19T21:57:19Z"
+		},
+		{
+			"checksumSHA1": "F0N5V10ap7J7/rAVRGa7QdmKqlU=",
+			"path": "github.com/gorilla/mux",
+			"revision": "7904d2e42e7ebbdb4a6eb3e57eb201b11df25c57",
+			"revisionTime": "2017-12-04T16:11:14Z"
+		},
+		{
+			"checksumSHA1": "BYvROBsiyAXK4sq6yhDe8RgT4LM=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "89742aefa4b206dcf400792f3bd35b542998eb3b",
+			"revisionTime": "2017-08-22T13:27:46Z"
+		},
+		{
+			"checksumSHA1": "ETvP7ajACFASoD2T2vYWoSfkuq0=",
+			"path": "github.com/urfave/negroni",
+			"revision": "5dbbc83f748fc3ad38585842b0aedab546d0ea1e",
+			"revisionTime": "2017-11-12T01:17:08Z"
+		},
+		{
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
+			"path": "golang.org/x/net/context",
+			"revision": "894f8ed5849b15b810ae41e9590a0d05395bba27",
+			"revisionTime": "2017-11-28T02:01:48Z"
+		}
+	],
+	"rootPath": "LB-traefik-api-server"
+}
