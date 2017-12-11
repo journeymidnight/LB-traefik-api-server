@@ -6,8 +6,8 @@ import (
 
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/urfave/negroni"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
+	"github.com/urfave/negroni"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -75,28 +75,28 @@ func ShowAPI(r *mux.Router) {
 }
 
 func RegisterRequests(r *mux.Router) {
-	r.HandleFunc("/", listAPI).Methods("GET")
-	r.HandleFunc("/api", listAPI).Methods("GET")
-	r.HandleFunc("/api/v1", listAPI).Methods("GET")
-	r.HandleFunc("/api/v1/services", listServices).Methods("GET")
-	r.HandleFunc("/api/v1/services/{service}", detailService).Methods("GET")
-	r.HandleFunc("/api/v1/services/{service}", createService).Methods("POST")
-	r.HandleFunc("/api/v1/services/{service}", updateService).Methods("PUT")
-	r.HandleFunc("/api/v1/services/{service}", deleteService).Methods("DELETE")
-	r.HandleFunc("/api/v1/certs", listCerts).Methods("GET")
-	r.HandleFunc("/api/v1/certs/{service}", createCert).Methods("POST")
-	r.HandleFunc("/api/v1/certs/{service}", updateCert).Methods("PUT")
-	r.HandleFunc("/api/v1/certs/{service}", deleteCert).Methods("DELETE")
-	r.HandleFunc("/api/v1/certs/{service}", detailCert).Methods("GET")
+	r.HandleFunc("/", ListAPI).Methods("GET")
+	r.HandleFunc("/api", ListAPI).Methods("GET")
+	r.HandleFunc("/api/v1", ListAPI).Methods("GET")
+	r.HandleFunc("/api/v1/services", ListServices).Methods("GET")
+	r.HandleFunc("/api/v1/services/{service}", DetailService).Methods("GET")
+	r.HandleFunc("/api/v1/services/{service}", CreateService).Methods("POST")
+	r.HandleFunc("/api/v1/services/{service}", UpdateService).Methods("PUT")
+	r.HandleFunc("/api/v1/services/{service}", DeleteService).Methods("DELETE")
+	r.HandleFunc("/api/v1/certs", ListCerts).Methods("GET")
+	r.HandleFunc("/api/v1/certs/{service}", CreateCert).Methods("POST")
+	r.HandleFunc("/api/v1/certs/{service}", UpdateCert).Methods("PUT")
+	r.HandleFunc("/api/v1/certs/{service}", DeleteCert).Methods("DELETE")
+	r.HandleFunc("/api/v1/certs/{service}", DetailCert).Methods("GET")
 }
 
-func listAPI(w http.ResponseWriter, r *http.Request) {
+func ListAPI(w http.ResponseWriter, r *http.Request) {
 	rtjson, _ := json.Marshal(AllRoutes)
 	fmt.Fprintf(w, string(rtjson))
 	return
 }
 
-func listCerts(w http.ResponseWriter, r *http.Request) {
+func ListCerts(w http.ResponseWriter, r *http.Request) {
 	services, err := List(CertPATH)
 	if err != nil {
 		apiError := &APIError{Ecode: OutOfService, EMessage: "Can't get service"}
@@ -117,7 +117,7 @@ func listCerts(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func createCert(w http.ResponseWriter, r *http.Request) {
+func CreateCert(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	serviceName := vars["service"]
 	if err := checkServiceDoesNotExist(serviceName); err != nil {
@@ -169,7 +169,7 @@ func createCert(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func detailCert(w http.ResponseWriter, r *http.Request) {
+func DetailCert(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	servicename := vars["service"]
 
@@ -201,7 +201,7 @@ func detailCert(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func updateCert(w http.ResponseWriter, r *http.Request) {
+func UpdateCert(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	serviceName := vars["service"]
 
@@ -254,7 +254,7 @@ func updateCert(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func deleteCert(w http.ResponseWriter, r *http.Request) {
+func DeleteCert(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	serviceName := vars["service"]
 
@@ -270,7 +270,7 @@ func deleteCert(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func listServices(w http.ResponseWriter, r *http.Request) {
+func ListServices(w http.ResponseWriter, r *http.Request) {
 	rtservers, err := List(FRONTENDS)
 	if err != nil {
 		rtjson := NewAPIError(InternalError, "internal error,please contact the administrator")
@@ -288,7 +288,7 @@ func listServices(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func detailService(w http.ResponseWriter, r *http.Request) {
+func DetailService(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	svcname := vars["service"]
 	if rtjson := checkServiceDoesNotExist(svcname); rtjson != nil {
@@ -306,56 +306,61 @@ func detailService(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func createService(w http.ResponseWriter, r *http.Request) {
-	var s *Service = &Service{}
+func CreateService(w http.ResponseWriter, r *http.Request) {
 	var rtjson []byte
+	vars := mux.Vars(r)
+	svcname := vars["service"]
 	body, _ := ioutil.ReadAll(r.Body)
-	if rtjson = checkNilJSON(body); rtjson != nil {
+	if rtjson = createService(svcname, body); rtjson != nil {
 		fmt.Fprint(w, string(rtjson))
 		return
+	} else {
+		rtjson = NewSuccess("create service successfully")
+		fmt.Fprint(w, string(rtjson))
+	}
+}
+
+func createService(svcname string, body []byte) []byte {
+	var s *Service = &Service{}
+	var rtjson []byte
+	if rtjson = checkNilJSON(body); rtjson != nil {
+		return rtjson
 	}
 	e := json.Unmarshal(body, s)
 	if e != nil {
 		apiError := APIError{Ecode: ParseJSONFailed, EMessage: "failed to parse json,please check the json format"}
 		rtjson, _ = json.Marshal(apiError)
-		fmt.Fprint(w, string(rtjson))
-		return
+		return rtjson
 	}
 
-	vars := mux.Vars(r)
-	svcname := vars["service"]
 	//check the service name is valid
 	if rtjson = checkServiceName(svcname); rtjson != nil {
-		fmt.Fprint(w, string(rtjson))
-		return
+		return rtjson
 	}
 	// checke if the service has already exists.
 	if rtjson = checkServiceAlreadyExist(svcname); rtjson != nil {
-		fmt.Fprint(w, string(rtjson))
-		return
+		return rtjson
 	}
 
 	// check required fields
 	if rtjson = checkRequiredField(s); rtjson != nil {
-		fmt.Fprint(w, string(rtjson))
-		return
+		return rtjson
 	}
 
 	//check the field in Service object
 	if rtjson = checkServiceField(s); rtjson != nil {
-		fmt.Fprint(w, string(rtjson))
-		return
+		return rtjson
 	}
+
 	if e := s.syncToEtcd(svcname); e != nil {
 		rtjson := NewAPIError(InternalError, "internal error,please contact the administrator")
-		fmt.Fprint(w, string(rtjson))
+		return rtjson
 	} else {
-		rtjson := NewSuccess("create service successfully")
-		fmt.Fprint(w, string(rtjson))
+		return nil
 	}
 }
 
-func updateService(w http.ResponseWriter, r *http.Request) {
+func UpdateService(w http.ResponseWriter, r *http.Request) {
 	var s *Service = &Service{}
 	var rtjson []byte
 	var e error
@@ -391,22 +396,36 @@ func updateService(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, string(rtjson))
 		return
 	}
-	if e := s.syncToEtcd(svcname); e != nil {
-		rtjson := NewAPIError(InternalError, "internal error,please contact the administrator")
+	if rtjson = deleteService(svcname); rtjson != nil {
 		fmt.Fprint(w, string(rtjson))
-	} else {
-		rtjson := NewSuccess("update service successfully")
-		fmt.Fprint(w, string(rtjson))
+		return
 	}
+
+	if rtjson = createService(svcname, body); rtjson != nil {
+		fmt.Fprint(w, string(rtjson))
+		return
+	}
+	rtjson = NewSuccess("update service successfully")
+	fmt.Fprint(w, string(rtjson))
 }
 
-func deleteService(w http.ResponseWriter, r *http.Request) {
+func DeleteService(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	svcname := vars["service"]
 	if rtjson := checkServiceDoesNotExist(svcname); rtjson != nil {
 		fmt.Fprint(w, string(rtjson))
 		return
 	}
+	if rtjson := deleteService(svcname); rtjson != nil {
+		fmt.Fprint(w, string(rtjson))
+		return
+	} else {
+		rtjson := NewSuccess("delete service successfully")
+		fmt.Fprint(w, string(rtjson))
+	}
+}
+
+func deleteService(svcname string) []byte {
 	prefixs := []string{FRONTENDS + svcname, BACKENDS + svcname}
 	/*	certs, _ := List("/traefik/tlsconfiguration")
 		if sliceContainString(certs,svcname) {
@@ -415,10 +434,9 @@ func deleteService(w http.ResponseWriter, r *http.Request) {
 	*/
 	if e := DeleteWithPrefixInList(prefixs); e != nil {
 		rtjson := NewAPIError(InternalError, "internal error,please contact the administrator")
-		fmt.Fprint(w, string(rtjson))
+		return rtjson
 	} else {
-		rtjson := NewSuccess("delete service successfully")
-		fmt.Fprint(w, string(rtjson))
+		return nil
 	}
 }
 

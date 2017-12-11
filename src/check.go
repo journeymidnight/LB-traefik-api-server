@@ -40,7 +40,7 @@ func NewAPIError(ecode ErrorCode, emessage string) []byte {
 }
 
 func NewSuccess(message string) []byte {
-	rtdict := map[string]string{message: message}
+	rtdict := map[string]string{"message": message}
 	rtJSON, _ := json.Marshal(rtdict)
 	return rtJSON
 }
