@@ -1,0 +1,20 @@
+{
+    "entrypoints": [
+        "http",
+        "https"
+    ],
+    "servers": [
+        {
+            "url": "http://10.72.84.123:8080",
+            "weight": "1"
+        },
+        {
+            "url": "http://10.72.84.111:80",
+            "weight": "2"
+        }
+    ],
+    "health": {
+        "path": "/health",
+        "interval": "5"
+    }
+}

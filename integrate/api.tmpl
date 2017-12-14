@@ -1,0 +1,17 @@
+{
+      "Image": "api",
+      "NetworkMode": "isolated_nw",
+      "Cmd": [
+		"/root/api --etcd.endpoints=172.20.10.100:2379"
+        ],
+      "entrypoint": ["bash","-c"],
+      "NetworkingConfig": {
+          "EndpointsConfig": {
+              "isolated_nw" : {
+                  "IPAMConfig": {
+                      "IPv4Address":"172.20.10.200"
+                  }
+              }
+          }
+      }
+ }

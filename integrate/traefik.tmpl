@@ -1,0 +1,17 @@
+{
+      "Image": "traefik",
+      "NetworkMode": "isolated_nw",
+      "Cmd": [
+		"/root/traefik --etcd  --etcd.endpoint=172.20.10.39:2379"
+        ],
+      "entrypoint": ["bash","-c"],
+      "NetworkingConfig": {
+          "EndpointsConfig": {
+              "isolated_nw" : {
+                  "IPAMConfig": {
+                      "IPv4Address":"172.20.10.101"
+                  }
+              }
+          }
+      }
+ }
