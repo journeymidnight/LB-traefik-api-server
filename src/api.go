@@ -59,7 +59,6 @@ func ShowAPI(r *mux.Router) {
 	r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		t, err := route.GetPathTemplate()
 		if err != nil {
-			fmt.Println(err)
 			return err
 		}
 		m, err := route.GetMethods()

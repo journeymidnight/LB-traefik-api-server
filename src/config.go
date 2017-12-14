@@ -8,20 +8,15 @@ import (
 	"reflect"
 )
 
-var Config *Configuration
+var Config *Configuration = LoadConfig()
 
 const CONFIGPATH = "conf.toml"
 
-func init() {
-	Config, _ = LoadConfig()
-	fmt.Println(Config)
-}
-
 type Configuration struct {
 	Accesslog string
-	Logpath  string
-	Loglevel string
-	Etcd     *Etcd
+	Logpath   string
+	Loglevel  string
+	Etcd      *Etcd
 }
 
 type Etcd struct {
@@ -38,26 +33,26 @@ func DefaultConfiguration() *Configuration {
 		Https:     false,
 	}
 	cfg := &Configuration{
-		Accesslog:  "api-access.log",
-		Logpath:  "api.log",
-		Loglevel: "info",
-		Etcd:     etcd,
+		Accesslog: "api-access.log",
+		Logpath:   "api.log",
+		Loglevel:  "info",
+		Etcd:      etcd,
 	}
 	return cfg
 }
 
-func LoadConfig() (*Configuration, error) {
+func LoadConfig() *Configuration {
 	rtConfig := DefaultConfiguration()
 	if _, err := os.Stat(CONFIGPATH); err != nil {
-		fmt.Fprint(os.Stderr,"config file does exsit,skipped config file")
+		fmt.Fprint(os.Stderr, "config file does exsit,skipped config file")
 	} else {
 		_, err = toml.DecodeFile("conf.toml", &rtConfig)
 		if err != nil {
-			fmt.Fprint(os.Stderr,"failed to decode config file,skipped config file")
+			fmt.Fprint(os.Stderr, "failed to decode config file,skipped config file")
 		}
 	}
 	mergeConfig(rtConfig, configFromFlag())
-	return rtConfig, nil
+	return rtConfig
 }
 
 func configFromFlag() *Configuration {
@@ -87,25 +82,25 @@ func mergeValue(v, v1 reflect.Value) {
 			if v.Field(i).CanSet() && !v1.Field(i).IsNil() {
 				mergeValue(v.Field(i).Elem(), v1.Field(i).Elem())
 			} else {
-				fmt.Fprint(os.Stderr,"can not set or value is empty")
+				fmt.Fprint(os.Stderr, "can not set or value is empty")
 			}
 		case reflect.Bool:
 			if v.Field(i).CanSet() {
 				v.Field(i).Set(v1.Field(i))
 			} else {
-				fmt.Fprint(os.Stderr,"can not set or value is empty")
+				fmt.Fprint(os.Stderr, "can not set or value is empty")
 			}
 		case reflect.Int:
 			if v.Field(i).CanSet() && v1.Field(i).Int() != 0 {
 				v.Field(i).Set(v1.Field(i))
 			} else {
-				fmt.Fprint(os.Stderr,"can not set or value is empty")
+				fmt.Fprint(os.Stderr, "can not set or value is empty")
 			}
 		default:
 			if v.Field(i).CanSet() && v1.Field(i).Len() != 0 {
 				v.Field(i).Set(v1.Field(i))
 			} else {
-				fmt.Fprint(os.Stderr,"can not set or value is empty")
+				fmt.Fprint(os.Stderr, "can not set or value is empty")
 			}
 		}
 	}

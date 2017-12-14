@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-const ENTRYPOINTS string = "127.0.0.1:2379"
 const CONNTIMEOUT = 5 * time.Second
 const OPTIMEOUT = 5 * time.Second
 
 func getclient() (error, *clientv3.Client, context.Context) {
+	log.Infof("the endponints for etcd is %s", Config.Etcd.Endpoints)
 	var cfg clientv3.Config
 	if Config.Etcd.Https {
 		tlsInfo := transport.TLSInfo{
@@ -28,12 +28,13 @@ func getclient() (error, *clientv3.Client, context.Context) {
 		}
 	} else {
 		cfg = clientv3.Config{
-			Endpoints:   strings.Split(ENTRYPOINTS, ","),
+			Endpoints:   strings.Split(Config.Etcd.Endpoints, ","),
 			DialTimeout: CONNTIMEOUT,
 		}
 	}
 	client, err := clientv3.New(cfg)
 	if err != nil {
+		log.Error(err)
 		return err, nil, nil
 	}
 	ctx, _ := context.WithTimeout(context.Background(), OPTIMEOUT)
