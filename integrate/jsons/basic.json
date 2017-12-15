@@ -1,0 +1,17 @@
+{
+    "entrypoints": [
+        "http",
+        "https"
+    ],
+    "servers": [
+        {
+            "url": "http://172.20.10.111:80",
+            "weight": "1"
+        },
+        {
+            "url": "http://172.20.10.112:80",
+            "weight": "2"
+        }
+
+    ]
+}

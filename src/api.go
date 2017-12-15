@@ -473,8 +473,9 @@ func (svc *Service) syncToEtcd(domainName string) error {
 		Put(BACKENDS+domainName+"/healthcheck/interval",svc.Health.Interval)
 		Put(BACKENDS+domainName+"/loadbalancer/stickiness",svc.Stickness) */
 	srcdict := map[string]string{
-		FRONTENDS + domainName + "/entrypoints": strings.Join(svc.EntryPoints, ","),
-		FRONTENDS + domainName + "/backend":     domainName,
+		FRONTENDS + domainName + "/entrypoints":       strings.Join(svc.EntryPoints, ","),
+		FRONTENDS + domainName + "/backend":           domainName,
+		FRONTENDS + domainName + "/routes/route/rule": "Host:" + domainName,
 	}
 	for k, server := range svc.Servers {
 		srcdict[BACKENDS+domainName+"/servers/server"+strconv.Itoa(k)+"/url"] = server.Url

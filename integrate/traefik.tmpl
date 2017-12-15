@@ -2,7 +2,7 @@
       "Image": "traefik",
       "NetworkMode": "isolated_nw",
       "Cmd": [
-		"/root/traefik --etcd  --etcd.endpoint=172.20.10.39:2379"
+                "/root/traefik -c /root/conf.toml"
         ],
       "entrypoint": ["bash","-c"],
       "NetworkingConfig": {

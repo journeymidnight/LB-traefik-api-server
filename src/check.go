@@ -81,14 +81,17 @@ func checkServiceField(svc *Service) []byte {
 	apiError := &APIError{Ecode: ServiceFieldInvalid, EMessage: "failed to pass syntax check"}
 	errJSON, _ := json.Marshal(apiError)
 	if !sliceContainString(EntryPointsValue, strings.Join(svc.EntryPoints, ",")) {
+		log.Warning("the request failed to pass entrypoint syntax check")
 		return errJSON
 	}
 	for _, server := range svc.Servers {
 		if m, _ := regexp.MatchString(URLPattern, server.Url); !m {
+			log.Warning("the request failed to pass server url syntax check")
 			return errJSON
 		}
 		if server.Weight != "" {
 			if m1, _ := regexp.MatchString("^[0-9]+$", server.Weight); !m1 {
+				log.Warning("the request failed to pass server weight syntax check")
 				return errJSON
 			}
 		}

@@ -1,0 +1,3 @@
+FROM docker.io/centos:latest
+COPY api /root
+CMD /root/api

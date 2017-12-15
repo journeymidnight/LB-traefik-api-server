@@ -96,9 +96,12 @@ func startContainer(containerid string) error {
 }
 func deleteContainer(containerid string) error {
 	cli := createClient()
-	request, e := http.NewRequest("DELETE", fmt.Sprintf("http://v1.24/containers/%s", containerid), nil)
+	request, e := http.NewRequest("DELETE", fmt.Sprintf("http://v1.24/containers/%s?force=1", containerid), nil)
 	resp, e := cli.Do(request)
 	defer resp.Body.Close()
+	if resp.StatusCode != 204 {
+		return fmt.Errorf("return code is %d,not 204", resp.StatusCode)
+	}
 	_, e = ioutil.ReadAll(resp.Body)
 	if e != nil {
 		return e
@@ -127,6 +130,9 @@ func deleteNetwork(netid string) error {
 	request, e := http.NewRequest("DELETE", fmt.Sprintf("http://v1.24/networks/%s", netid), nil)
 	resp, e := cli.Do(request)
 	defer resp.Body.Close()
+	if resp.StatusCode != 204 {
+		return fmt.Errorf("return code is %d,not 204", resp.StatusCode)
+	}
 	_, e = ioutil.ReadAll(resp.Body)
 	if e != nil {
 		return e
