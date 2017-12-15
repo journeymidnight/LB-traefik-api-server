@@ -410,6 +410,12 @@
 			"path": "google.golang.org/grpc/transport",
 			"revision": "809b0d71a36a38c6884a3cd67897078495dbd921",
 			"revisionTime": "2017-12-09T23:49:03Z"
+		},
+		{
+			"checksumSHA1": "CEFTYXtWmgSh+3Ik1NmDaJcz4E0=",
+			"path": "gopkg.in/check.v1",
+			"revision": "20d25e2804050c1cd24a7eea1e7a6447dd0e74ec",
+			"revisionTime": "2016-12-08T18:13:25Z"
 		}
 	],
 	"rootPath": "LB-traefik-api-server"
