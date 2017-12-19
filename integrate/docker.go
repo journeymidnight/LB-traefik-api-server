@@ -94,6 +94,21 @@ func startContainer(containerid string) error {
 	}
 	return nil
 }
+
+func stopContainer(containerid string) error {
+	cli := createClient()
+	resp, e := cli.Post(fmt.Sprintf("http://v1.24/containers/%s/stop", containerid), "application/json", nil)
+	defer resp.Body.Close()
+	_, e = ioutil.ReadAll(resp.Body)
+	if e != nil {
+		return e
+	}
+	if resp.StatusCode != 204 {
+		return fmt.Errorf("return code is %d,not 204", resp.StatusCode)
+	}
+	return nil
+}
+
 func deleteContainer(containerid string) error {
 	cli := createClient()
 	request, e := http.NewRequest("DELETE", fmt.Sprintf("http://v1.24/containers/%s?force=1", containerid), nil)

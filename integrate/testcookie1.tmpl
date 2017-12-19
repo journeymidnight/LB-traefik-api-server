@@ -1,15 +1,11 @@
 {
-      "Image": "dahefanteng/traefik",
+      "Image": "dahefanteng/testcookie",
       "NetworkMode": "isolated_nw",
-      "Cmd": [
-                "/root/traefik -c /root/conf.toml --debug"
-        ],
-      "entrypoint": ["bash","-c"],
       "NetworkingConfig": {
           "EndpointsConfig": {
               "isolated_nw" : {
                   "IPAMConfig": {
-                      "IPv4Address":"172.20.10.101"
+                      "IPv4Address":"172.20.10.113"
                   }
               }
           }
