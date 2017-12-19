@@ -7,6 +7,7 @@ import (
 	gocheck "gopkg.in/check.v1"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -359,7 +360,7 @@ func (s *APISuite) TestStickiness(c *gocheck.C) {
 	c.Assert(err, gocheck.Equals, nil)
 	c.Assert(rt.Ecode, gocheck.Equals, int64(0))
 
-	time.Sleep(300 * time.Second)
+	time.Sleep(10 * time.Second)
 	client := &http.Client{}
 	request, e := http.NewRequest("Get", "http://172.20.10.101", nil)
 	c.Assert(e, gocheck.Equals, nil)
@@ -370,8 +371,15 @@ func (s *APISuite) TestStickiness(c *gocheck.C) {
 	fmt.Println("body:", string(body))
 	c.Assert(e, gocheck.Equals, nil)
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
+	rtcook := resp.Cookies()[0]
+
+	r, e := regexp.Compile("172.20.10.11[3-4]")
+	c.Assert(e, gocheck.Equals, nil)
+	ip := r.FindString(string(body))
+	fmt.Println(ip)
 	for i := 0; i < 5; i++ {
 		request, e = http.NewRequest("Get", "http://172.20.10.101/display", nil)
+		request.AddCookie(rtcook)
 		c.Assert(e, gocheck.Equals, nil)
 		request.Host = "teststick.com"
 		resp, e = client.Do(request)
@@ -380,5 +388,6 @@ func (s *APISuite) TestStickiness(c *gocheck.C) {
 		fmt.Println("body:", string(body))
 		c.Assert(e, gocheck.Equals, nil)
 		c.Assert(resp.StatusCode, gocheck.Equals, 200)
+		c.Assert(strings.Contains(string(body), ip), gocheck.Equals, true)
 	}
 }

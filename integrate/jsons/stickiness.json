@@ -10,7 +10,7 @@
         },
         {
             "url": "http://172.20.10.114:80",
-            "weight": "2"
+            "weight": "1"
         }
     ],
     "stickiness": "true"
