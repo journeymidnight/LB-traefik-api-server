@@ -485,6 +485,7 @@ func (svc *Service) syncToEtcd(domainName string) error {
 	}
 	if svc.Stickiness != "" {
 		srcdict[BACKENDS+domainName+"/loadbalancer/stickiness"] = svc.Stickiness
+		srcdict[BACKENDS+domainName+"/loadbalancer/method"] = "wrr"
 	}
 	if svc.Health != nil && svc.Health.Path != "" {
 		srcdict[BACKENDS+domainName+"/healthcheck/path"] = svc.Health.Path
