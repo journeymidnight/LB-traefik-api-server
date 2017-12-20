@@ -2,6 +2,7 @@ package integrate
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	gocheck "gopkg.in/check.v1"
@@ -390,4 +391,89 @@ func (s *APISuite) TestStickiness(c *gocheck.C) {
 		c.Assert(resp.StatusCode, gocheck.Equals, 200)
 		c.Assert(strings.Contains(string(body), ip), gocheck.Equals, true)
 	}
+}
+
+type Certs struct {
+	CertFile string
+	KeyFile  string
+}
+
+func (s *APISuite) TestCreateAndDeleteCert(c *gocheck.C) {
+	time.Sleep(1 * time.Second)
+	data, e := ioutil.ReadFile("jsons/basic.json")
+	c.Assert(e, gocheck.Equals, nil)
+	resp, e := http.Post("http://172.20.10.200/api/v1/services/www.testapi.org", "application/json", bytes.NewBuffer(data))
+	time.Sleep(1 * time.Second)
+	c.Assert(e, gocheck.Equals, nil)
+	c.Assert(resp.StatusCode, gocheck.Equals, 200)
+	rt := &struct{ Ecode int64 }{}
+	body, err := ioutil.ReadAll(resp.Body)
+	c.Assert(err, gocheck.Equals, nil)
+	err = json.Unmarshal(body, rt)
+	c.Assert(err, gocheck.Equals, nil)
+	c.Assert(rt.Ecode, gocheck.Equals, int64(0))
+
+	orgcert, err := ioutil.ReadFile("certs/testapi.org.crt")
+	c.Assert(err, gocheck.Equals, nil)
+	orgkey, err := ioutil.ReadFile("certs/testapi.org")
+	c.Assert(err, gocheck.Equals, nil)
+	scert := Certs{CertFile: string(orgcert), KeyFile: string(orgkey)}
+	sjson, err := json.Marshal(scert)
+	c.Assert(err, gocheck.Equals, nil)
+	resp, e = http.Post("http://172.20.10.200/api/v1/certs/www.testapi.org", "application/json", bytes.NewBuffer(sjson))
+	c.Assert(e, gocheck.Equals, nil)
+	c.Assert(resp.StatusCode, gocheck.Equals, 200)
+	body, err = ioutil.ReadAll(resp.Body)
+	c.Assert(err, gocheck.Equals, nil)
+	fmt.Println(string(body))
+	time.Sleep(time.Second * 1)
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true, ServerName: "www.testapi.org"},
+	}
+	client := &http.Client{Transport: tr}
+	request, e := http.NewRequest("Get", "https://172.20.10.101", nil)
+	c.Assert(e, gocheck.Equals, nil)
+	request.Host = "www.testapi.org"
+	request.Header.Set("Host", "www.testapi.org")
+	request.Header.Set("Accept", "*/*")
+	resp, e = client.Do(request)
+	c.Assert(e, gocheck.Equals, nil)
+	c.Assert(resp.StatusCode, gocheck.Equals, 200)
+	body, err = ioutil.ReadAll(resp.Body)
+	c.Assert(err, gocheck.Equals, nil)
+	c.Assert(resp.TLS.PeerCertificates[0].Subject.CommonName, gocheck.Equals, "www.testapi.org")
+
+	/*
+		//test delete cert
+
+		//	time.Sleep(50 * time.Second)
+		fmt.Println("before delete")
+		request, e = http.NewRequest("DELETE", "http://172.20.10.200/api/v1/certs/www.testapi.org", nil)
+		c.Assert(e, gocheck.Equals, nil)
+		simplecli := &http.Client{}
+		resp, e = simplecli.Do(request)
+		c.Assert(e, gocheck.Equals, nil)
+		body, e = ioutil.ReadAll(resp.Body)
+		c.Assert(e, gocheck.Equals, nil)
+		c.Assert(resp.StatusCode, gocheck.Equals, 200)
+		fmt.Println(string(body))
+		time.Sleep(100 * time.Second)
+
+		req, e := http.NewRequest("Get", "https://172.20.10.101", nil)
+		c.Assert(e, gocheck.Equals, nil)
+		req.Host = "www.testapi.org"
+	 req.Header.Set("Host", "www.testapi.org")*/
+	//	req.Header.Set("Accept", "*/*")
+	/*	tr1 := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true, ServerName: "www.testapi.org"},
+		}
+		cli := &http.Client{Transport: tr1}
+		res, e := cli.Do(req)
+		c.Assert(e, gocheck.Equals, nil)
+		c.Assert(res.StatusCode, gocheck.Equals, 200)
+		body, err = ioutil.ReadAll(res.Body)
+		c.Assert(err, gocheck.Equals, nil)
+		c.Assert(res.TLS.PeerCertificates[0].Subject.CommonName, gocheck.Equals, "TRAEFIK DEFAULT CERT")
+	*/
 }

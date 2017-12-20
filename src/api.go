@@ -162,7 +162,11 @@ func CreateCert(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, string(retjson))
 		return
 	}
-
+	if err := Put(CertPATH+serviceName+"/entrypoints", "https"); err != nil {
+		retjson := NewAPIError(InternalError, "internal error,please contact the administrator")
+		fmt.Fprintf(w, string(retjson))
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "create successfully\n")
 	return
@@ -248,6 +252,11 @@ func UpdateCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := Put(CertPATH+serviceName+"/entrypoints", "https"); err != nil {
+		retjson := NewAPIError(InternalError, "internal error,please contact the administrator")
+		fmt.Fprintf(w, string(retjson))
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "update successfully\n")
 	return
