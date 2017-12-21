@@ -133,7 +133,6 @@ func (s *APISuite) TestCreateService(c *gocheck.C) {
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
 	rt := &struct{ Ecode int64 }{}
 	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body), "aaa")
 	c.Assert(err, gocheck.Equals, nil)
 	err = json.Unmarshal(body, rt)
 	c.Assert(err, gocheck.Equals, nil)
@@ -147,7 +146,6 @@ func (s *APISuite) TestCreateService(c *gocheck.C) {
 	body, e = ioutil.ReadAll(resp.Body)
 	c.Assert(e, gocheck.Equals, nil)
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
-	fmt.Println("body:", string(body))
 }
 
 func (s *APISuite) TestAddService(c *gocheck.C) {
@@ -160,7 +158,6 @@ func (s *APISuite) TestAddService(c *gocheck.C) {
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
 	rt := &struct{ Ecode int64 }{}
 	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body), "aaa")
 	c.Assert(err, gocheck.Equals, nil)
 	err = json.Unmarshal(body, rt)
 	c.Assert(err, gocheck.Equals, nil)
@@ -174,7 +171,6 @@ func (s *APISuite) TestAddService(c *gocheck.C) {
 	body, e = ioutil.ReadAll(resp.Body)
 	c.Assert(e, gocheck.Equals, nil)
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
-	fmt.Println("body:", string(body))
 
 	data, e = ioutil.ReadFile("jsons/single112.json")
 	c.Assert(e, gocheck.Equals, nil)
@@ -184,7 +180,6 @@ func (s *APISuite) TestAddService(c *gocheck.C) {
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
 	rt = &struct{ Ecode int64 }{}
 	body, err = ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body), "aaa")
 	c.Assert(err, gocheck.Equals, nil)
 	err = json.Unmarshal(body, rt)
 	c.Assert(err, gocheck.Equals, nil)
@@ -225,7 +220,6 @@ func (s *APISuite) TestUpdateServices(c *gocheck.C) {
 	c.Assert(e, gocheck.Equals, nil)
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
 	c.Assert(strings.Contains(string(body), "172.20.10.111"), gocheck.Equals, true)
-	fmt.Println("body:", string(body))
 
 	data, e = ioutil.ReadFile("jsons/single112.json")
 	c.Assert(e, gocheck.Equals, nil)
@@ -277,7 +271,6 @@ func (s *APISuite) TestDeleteServices(c *gocheck.C) {
 	c.Assert(e, gocheck.Equals, nil)
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
 	c.Assert(strings.Contains(string(body), "172.20.10.111"), gocheck.Equals, true)
-	fmt.Println("body:", string(body))
 
 	client = &http.Client{}
 	request, e = http.NewRequest("DELETE", "http://172.20.10.200/api/v1/services/testdelete.com", nil)
@@ -325,11 +318,9 @@ func (s *APISuite) TestHealthCheck(c *gocheck.C) {
 	body, e = ioutil.ReadAll(resp.Body)
 	c.Assert(e, gocheck.Equals, nil)
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
-	fmt.Println("body:", string(body))
 
 	e = stopContainer(s.whoami1id)
 	c.Assert(e, gocheck.Equals, nil)
-	fmt.Println("stoped container")
 	time.Sleep(20 * time.Second)
 	for i := 0; i < 5; i++ {
 		request, e = http.NewRequest("Get", "http://172.20.10.101", nil)
@@ -338,7 +329,6 @@ func (s *APISuite) TestHealthCheck(c *gocheck.C) {
 		resp, e = client.Do(request)
 		c.Assert(e, gocheck.Equals, nil)
 		body, e = ioutil.ReadAll(resp.Body)
-		fmt.Println("body:", string(body))
 		c.Assert(e, gocheck.Equals, nil)
 		c.Assert(resp.StatusCode, gocheck.Equals, 200)
 		c.Assert(strings.Contains(string(body), "172.20.10.112"), gocheck.Equals, true)
@@ -369,7 +359,6 @@ func (s *APISuite) TestStickiness(c *gocheck.C) {
 	resp, e = client.Do(request)
 	c.Assert(e, gocheck.Equals, nil)
 	body, e = ioutil.ReadAll(resp.Body)
-	fmt.Println("body:", string(body))
 	c.Assert(e, gocheck.Equals, nil)
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
 	rtcook := resp.Cookies()[0]
@@ -377,7 +366,6 @@ func (s *APISuite) TestStickiness(c *gocheck.C) {
 	r, e := regexp.Compile("172.20.10.11[3-4]")
 	c.Assert(e, gocheck.Equals, nil)
 	ip := r.FindString(string(body))
-	fmt.Println(ip)
 	for i := 0; i < 5; i++ {
 		request, e = http.NewRequest("Get", "http://172.20.10.101/display", nil)
 		request.AddCookie(rtcook)
@@ -386,7 +374,6 @@ func (s *APISuite) TestStickiness(c *gocheck.C) {
 		resp, e = client.Do(request)
 		c.Assert(e, gocheck.Equals, nil)
 		body, e = ioutil.ReadAll(resp.Body)
-		fmt.Println("body:", string(body))
 		c.Assert(e, gocheck.Equals, nil)
 		c.Assert(resp.StatusCode, gocheck.Equals, 200)
 		c.Assert(strings.Contains(string(body), ip), gocheck.Equals, true)
@@ -425,7 +412,6 @@ func (s *APISuite) TestCreateAndDeleteCert(c *gocheck.C) {
 	c.Assert(resp.StatusCode, gocheck.Equals, 200)
 	body, err = ioutil.ReadAll(resp.Body)
 	c.Assert(err, gocheck.Equals, nil)
-	fmt.Println(string(body))
 	time.Sleep(time.Second * 1)
 
 	tr := &http.Transport{
@@ -444,36 +430,32 @@ func (s *APISuite) TestCreateAndDeleteCert(c *gocheck.C) {
 	c.Assert(err, gocheck.Equals, nil)
 	c.Assert(resp.TLS.PeerCertificates[0].Subject.CommonName, gocheck.Equals, "www.testapi.org")
 
-	/*
-		//test delete cert
+	//test delete cert
 
-		//	time.Sleep(50 * time.Second)
-		fmt.Println("before delete")
-		request, e = http.NewRequest("DELETE", "http://172.20.10.200/api/v1/certs/www.testapi.org", nil)
-		c.Assert(e, gocheck.Equals, nil)
-		simplecli := &http.Client{}
-		resp, e = simplecli.Do(request)
-		c.Assert(e, gocheck.Equals, nil)
-		body, e = ioutil.ReadAll(resp.Body)
-		c.Assert(e, gocheck.Equals, nil)
-		c.Assert(resp.StatusCode, gocheck.Equals, 200)
-		fmt.Println(string(body))
-		time.Sleep(100 * time.Second)
+	time.Sleep(2 * time.Second)
+	request, e = http.NewRequest("DELETE", "http://172.20.10.200/api/v1/certs/www.testapi.org", nil)
+	c.Assert(e, gocheck.Equals, nil)
+	simplecli := &http.Client{}
+	resp, e = simplecli.Do(request)
+	c.Assert(e, gocheck.Equals, nil)
+	body, e = ioutil.ReadAll(resp.Body)
+	c.Assert(e, gocheck.Equals, nil)
+	c.Assert(resp.StatusCode, gocheck.Equals, 200)
+	time.Sleep(2 * time.Second)
 
-		req, e := http.NewRequest("Get", "https://172.20.10.101", nil)
-		c.Assert(e, gocheck.Equals, nil)
-		req.Host = "www.testapi.org"
-	 req.Header.Set("Host", "www.testapi.org")*/
-	//	req.Header.Set("Accept", "*/*")
-	/*	tr1 := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true, ServerName: "www.testapi.org"},
-		}
-		cli := &http.Client{Transport: tr1}
-		res, e := cli.Do(req)
-		c.Assert(e, gocheck.Equals, nil)
-		c.Assert(res.StatusCode, gocheck.Equals, 200)
-		body, err = ioutil.ReadAll(res.Body)
-		c.Assert(err, gocheck.Equals, nil)
-		c.Assert(res.TLS.PeerCertificates[0].Subject.CommonName, gocheck.Equals, "TRAEFIK DEFAULT CERT")
-	*/
+	req, e := http.NewRequest("Get", "https://172.20.10.101", nil)
+	c.Assert(e, gocheck.Equals, nil)
+	req.Host = "www.testapi.org"
+	req.Header.Set("Host", "www.testapi.org")
+	req.Header.Set("Accept", "*/*")
+	tr1 := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true, ServerName: "www.testapi.org"},
+	}
+	cli := &http.Client{Transport: tr1}
+	res, e := cli.Do(req)
+	c.Assert(e, gocheck.Equals, nil)
+	c.Assert(res.StatusCode, gocheck.Equals, 200)
+	body, err = ioutil.ReadAll(res.Body)
+	c.Assert(err, gocheck.Equals, nil)
+	c.Assert(res.TLS.PeerCertificates[0].Subject.CommonName, gocheck.Equals, "TRAEFIK DEFAULT CERT")
 }
