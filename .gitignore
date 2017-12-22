@@ -1,2 +1,3 @@
 lb-app
 *.log
+src/*.log

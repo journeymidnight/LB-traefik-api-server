@@ -168,7 +168,8 @@ func CreateCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "create successfully\n")
+	rtjson := NewSuccess("create cert successfully")
+	fmt.Fprint(w, string(rtjson))
 	return
 }
 
@@ -258,7 +259,8 @@ func UpdateCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "update successfully\n")
+	rtjson := NewSuccess("update cert successfully")
+	fmt.Fprint(w, string(rtjson))
 	return
 }
 
@@ -274,7 +276,8 @@ func DeleteCert(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "delete successfully\n")
+	rtjson := NewSuccess("delete cert successfully")
+	fmt.Fprint(w, string(rtjson))
 	return
 }
 
