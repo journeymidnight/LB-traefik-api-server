@@ -5,6 +5,7 @@ workspace:
 pipeline:
   build:
     image: "golang"
+    privileged: true
     commands:
       - "cd src"
       - "go get ./..."
